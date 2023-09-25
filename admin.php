@@ -1,18 +1,21 @@
 <?php
+
+ob_start();
+session_start();
+
 include "prefs.php";
 include "includes/functions.php";
 include "templates/top.php"; 
-
-session_start();?>
+?>
 <div class="wrapper">
 <?php
+$error = "";
+
 if (!isset($_SESSION['loggedin'])) {
     if (isset($_GET['p']) && $_GET['p'] == "login") {
         if (($_POST['username'] == $username) && (password_verify($_POST['password'], $password_hash))) {
-            session_regenerate_id();
             $_SESSION['loggedin'] = TRUE;
             $_SESSION['name'] = $_POST['username'];
-            $_SESSION['id'] = session_id();
             header('Location: admin');
         } else {
             $error = "<p>There was an error logging in. Try again.</p>";
@@ -73,7 +76,6 @@ if (!isset($_SESSION['loggedin'])) {
                 <td><a href="<?php echo $rows['url']; ?>"><?php echo $rows['url']; ?></a></td>
                 <td><?php echo date_format(date_create($rows['date']), "Y-m-d"); ?></td>
                 <td><?php echo substr(htmlentities($rows['comment']), 0, 30) . "..."; ?></td>
-                <td><?php echo substr(htmlentities($rows['reply']), 0, 30) . "..." ; ?></td>
                 <td><a href="?p=edit&pending=<?php echo $rows['id']; ?>">Edit</a></td>
                 </tr>
 <?php
@@ -174,6 +176,40 @@ if (!isset($_SESSION['loggedin'])) {
                 }
 ?>
                 <p>Entry edited successfully.</p>
+                <p><a href="?p=<?php echo $_POST['comment_status']; ?>">Back to list of comments</a></p>
+<?php
+            } else if (isset($_POST['delete'])) {
+                if ($_POST['comment_status'] == "pendingcomments") {
+                    $entries = toArray("queue.csv");
+                    $key = array_search($_POST['comment_id'], array_column($entries, 'id'));
+                    if ($key !== false) {
+                        unset($entries[$key]);
+                    }
+                    
+                    $file = fopen("queue.csv","w");
+                    $headers = ["id","name","url","date","comment","reply"];
+                    fputcsv($file, $headers);
+                    foreach ($entries as $row) {
+                      fputcsv($file, $row);
+                    }
+                    fclose($file);
+                } else if ($_POST['comment_status'] == "comments") {
+                    $entries = toArray("entries.csv");
+                    $key = array_search($_POST['comment_id'], array_column($entries, 'id'));
+                    if ($key !== false) {
+                        unset($entries[$key]);
+                    }
+                    
+                    $file = fopen("entries.csv","w");
+                    $headers = ["id","name","url","date","comment","reply"];
+                    fputcsv($file, $headers);
+                    foreach ($entries as $row) {
+                      fputcsv($file, $row);
+                    }
+                    fclose($file);
+                }
+?>
+                <p>Entry deleted successfully.</p>
                 <p><a href="?p=<?php echo $_POST['comment_status']; ?>">Back to list of comments</a></p>
 <?php
             } else {

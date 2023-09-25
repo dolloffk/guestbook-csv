@@ -1,10 +1,12 @@
 <?php 
+ob_start();
+session_start();
+
 include "functions.php";
 include "prefs.php";
 
 include "templates/top.php";
 
-session_start();
 $_SESSION['name'] = NULL;
 $_SESSION['url'] = NULL;
 $_SESSION['comment'] = NULL;
@@ -38,7 +40,6 @@ if (isset($_POST['submit'])) {
     $url = strip_tags($_POST['website']);
     $security = $_POST['security'];
     $comment = htmlentities(strip_tags($_POST['comment']));
-    $ip = $_SERVER['REMOTE_ADDR'];
     
     $_SESSION['name'] = $name;
     $_SESSION['url'] = $url;
@@ -53,10 +54,12 @@ if (isset($_POST['submit'])) {
             $csvpath = "entries.csv";
         }
         
-        addComment($csvpath, $name, $url, $ip, str_replace(array("\r\n", "\r", "\n"), "<br />", $comment));
+        addComment($csvpath, $name, $url, str_replace(array("\r\n", "\r", "\n"), "<br />", $comment));
         $_SESSION['name'] = '';
         $_SESSION['url'] = '';
         $_SESSION['comment'] = '';
+        
+        flush();
         header('Location: sign?p=success');
     } else {
         $msg .= "<p>Your comment could not be posted. See the following errors:</p><p>".$error."</p>";
