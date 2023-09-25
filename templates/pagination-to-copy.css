@@ -1,0 +1,38 @@
+:root {
+    --pagebg:#232c2f;
+	--pagecolor:#DCD7C9;
+    --border: #5b7e81;
+}
+
+ul.pages {
+    list-style:none;
+    margin:auto;
+    text-align:center;
+}
+
+ul.pages li { display:inline; }
+
+ul.pages li a, ul.pages li.active {
+    font-size: 1.2rem; 
+    border: 1px solid var(--border); 
+    padding:5px;
+    margin:2px;
+    transition:0.5s ease;
+    text-decoration:none;
+}
+
+ul.pages li.page a:hover {
+    background:var(--pagecolor);
+    color:var(--pagebg);
+    transition:0.5s ease;
+}
+
+ul.pages li.page a {
+    background: var(--pagebg);  
+    color: var(--pagecolor);
+}
+
+ul.pages li.active {
+    background:var(--pagecolor);
+    color:var(--pagebg);
+}
