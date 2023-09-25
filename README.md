@@ -14,7 +14,7 @@ It's not the slickest code, but it does what it needs to do!
     - `entry.php` is the template for displaying entries. The variables you have to work with are `$name`, `$url`, `$date`, `$comment`, and `$reply`.
     - Additionally, there's a file called `pagination-to-copy.css` with CSS to make the built-in pagination work correctly, should you choose to use your own stylesheet. Feel free to edit as much as necessary.
 - Upload everything in the folder to your website wherever you want your guestbook.
-- CHMOD `entries.txt` and `queue.txt` to 640 to avoid them being accessed by the public.
+- CHMOD `entries.csv` and `queue.csv` to 640 to avoid them being accessed by the public.
 - Have fun!
 
 ## Troubleshooting
