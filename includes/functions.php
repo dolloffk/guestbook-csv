@@ -24,15 +24,17 @@
     }
     
     function getID($filepath) {
-        $rows = [];
-        
-        $file = fopen($filepath, "r");
-        while ($row = fgetcsv($file)) {
-            $rows[] = $row;
+        $entries = toArray($filepath);
+        $ids = [];
+        foreach ($entries as $key => $val) {
+            $ids[$key] = $val['id'];
         }
-        fclose($file);
         
-        $id = count($rows);
+        if (count($ids) > 0) {
+            $id = max($ids) + 1;
+        } else {
+            $id = 1;
+        }
         return $id;
     }
     
@@ -144,7 +146,7 @@
         return $error;
     }
     
-    function addComment($filepath, $name, $url, $ip, $comment) {
+    function addComment($filepath, $name, $url, $comment) {
         $id = getID($filepath);
         $newentry = array($id, $name, $url, date("Y-m-d H:i:s"), $comment, "");
         
