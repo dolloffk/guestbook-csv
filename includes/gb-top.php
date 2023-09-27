@@ -60,7 +60,7 @@ if (isset($_POST['submit'])) {
         $_SESSION['comment'] = '';
         
         flush();
-        header('Location: sign?p=success');
+        header('Location: sign.php?p=success');
     } else {
         $msg .= "<p>Your comment could not be posted. See the following errors:</p><p>".$error."</p>";
     }

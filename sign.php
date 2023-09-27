@@ -4,7 +4,7 @@ include "includes/gb-top.php";
 
 <h2>Sign guestbook</h2>
 <?php echo $msg; ?>
-<form id="comment" method="post" action="sign">
+<form id="comment" method="post" action="sign.php">
 <div><label for="username">Name</label><br/><input type="text" name="username" role="username" placeholder="Name" value="<?php echo $_SESSION['name']; ?>"></input></div>
 <div><label for="website">Website (optional)</label><br/><input type="text" name="website" role="website" placeholder="http://" value="<?php echo $_SESSION['url']; ?>"></input></div>
 <div><label for="security"><?php echo $securityq; ?></label><br/><input type="text" name="security" role="security" placeholder="yes/no"></input></div>
