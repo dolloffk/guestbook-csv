@@ -2,7 +2,7 @@
 include "includes/gb-top.php";
 
 $filepath = "entries.csv";
-$entries = dateSort(toArray($filepath));
+$entries = dateSort(toArray($filepath), $descending);
 
 $total_entries = countComments($entries);
 $page = isset($_GET['page']) && is_numeric($_GET['page']) ? $_GET['page'] : 1;

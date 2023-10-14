@@ -1,5 +1,4 @@
 <?php
-    // DISPLAYING ENTRIES
     
     function toArray ($filepath) {
         $rows = [];
@@ -31,20 +30,19 @@
         }
         
         if (count($ids) > 0) {
-            $id = max($ids) + 1;
+            $id = max($ids) + 1; 
         } else {
             $id = 1;
         }
         return $id;
     }
     
-    function dateSort($entries) {
-        $dates = [];
-        foreach ($entries as $key => $val) {
-            $dates[$key] = $val['date'];
-             
+    function dateSort($entries, $descending) {
+        if ($descending) {
+            array_multisort(array_column($entries, 'date'), SORT_DESC, $entries);
+        } else {
+            array_multisort(array_column($entries, 'date'), SORT_ASC, $entries);
         }
-        array_multisort($dates, SORT_DESC, $entries);
         return $entries;
     }
     
@@ -68,10 +66,6 @@
         include "templates/entry.php";
     }
 
-    
-    // ENTRY VALIDATION
-    
-    
     function checkName($name) {
         if (!empty($name) && !preg_match("/^[a-zA-Z-'\s]*$/", $name)) {
             return false;
@@ -81,7 +75,7 @@
     }
     
     function checkUrl($url) {
-        if (!empty($url) && !preg_match('/^(http|https):\/\/(([A-Z0-9][A-Z0-9_-]*)(\.[A-Z0-9][A-Z0-9_-]*)+)(:(\d+))?\/?/i', $url)) {
+        if (!empty($url) && !filter_var($url, FILTER_VALIDATE_URL)) {
             return false;
         }
         
@@ -105,7 +99,7 @@
     }
     
     function checkSecurity($answer, $correct) {
-        $answer = strtolower($answer);
+        $answer = trim(strtolower($answer));
         if ((!empty($answer)) && ($answer !== $correct)) {
             return false;
         }
