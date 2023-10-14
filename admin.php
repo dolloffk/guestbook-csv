@@ -11,9 +11,11 @@ include "templates/top.php";
 <?php
 $error = "";
 
+// Display login form if not logged in
 if (!isset($_SESSION['loggedin'])) {
     if (isset($_GET['p']) && $_GET['p'] == "login") {
         if (($_POST['username'] == $username) && (password_verify($_POST['password'], $password_hash))) {
+            // Log in, start a new session, and redirect back to the admin panel
             $_SESSION['loggedin'] = TRUE;
             $_SESSION['name'] = $_POST['username'];
             header('Location: admin');
@@ -33,12 +35,13 @@ if (!isset($_SESSION['loggedin'])) {
 ?>
 
 <?php 
+    // Cases for each tab
     $tab = $_GET['p'];
     if ($tab=="") { $tab = "home"; }
     
     switch($tab) {
         case "comments":
-            $entries = dateSort(toArray("entries.csv"));
+            $entries = dateSort(toArray("entries.csv"), true);
 ?>
             <h1>Approved comments</h1>
             <table>
@@ -63,7 +66,7 @@ if (!isset($_SESSION['loggedin'])) {
 <?php
             break;
         case "pendingcomments":
-            $entries = dateSort(toArray("queue.csv")); 
+            $entries = dateSort(toArray("queue.csv"), true); 
 ?>
             <h1>Pending comments</h1>
             <table>
