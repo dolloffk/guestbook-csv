@@ -7,18 +7,18 @@ include "prefs.php";
 
 include "templates/top.php";
 
-$_SESSION['name'] = NULL;
-$_SESSION['url'] = NULL;
-$_SESSION['comment'] = NULL;
+$_SESSION['name'] = null;
+$_SESSION['url'] = null;
+$_SESSION['comment'] = null;
 
-$msg = NULL;
+$msg = null;
 
 if (isset($_GET['p']) && $_GET['p'] == "success") {
     $msg .= "<p>Comment successfully submitted for approval!</p>";
 }
 
 if (isset($_POST['submit'])) {
-    $error = NULL;
+    $error = null;
     
     if ((!empty($_POST['name'])) || (!empty($_POST['url']))) {
         $error .= "No bots! ";
@@ -47,14 +47,15 @@ if (isset($_POST['submit'])) {
     
     $error .= validateComment($name, $url, $security, $securitya, $comment);
     
-    if ($error == NULL) {
-        if ($approve == TRUE) {
+    if ($error == null) {
+        if ($approve) {
             $csvpath = "queue.csv";
         } else {
             $csvpath = "entries.csv";
         }
         
-        addComment($csvpath, $name, $url, str_replace(array("\r\n", "\r", "\n"), "<br />", $comment));
+        $date = date("Y-m-d H:i:s");
+        addComment($csvpath, $name, $url, $date, str_replace(array("\r\n", "\r", "\n"), "<br />", $comment), "");
         $_SESSION['name'] = '';
         $_SESSION['url'] = '';
         $_SESSION['comment'] = '';

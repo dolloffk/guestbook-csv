@@ -1,16 +1,16 @@
 <?php
     
     function toArray ($filepath) {
-        $rows = [];
+        $entry = [];
         $file = fopen($filepath, "r");
         while ($row = fgetcsv($file)) {
-            $rows[] = $row;
+            $entry[] = $row;
         }
         fclose($file);
 
-        $headers = array_shift($rows);
+        $headers = array_shift($entry);
         $entries = [];
-        foreach ($rows as $row) {
+        foreach ($entry as $row) {
             $entries[] = array_combine($headers, $row);
         }
         
@@ -24,10 +24,7 @@
     
     function getID($filepath) {
         $entries = toArray($filepath);
-        $ids = [];
-        foreach ($entries as $key => $val) {
-            $ids[$key] = $val['id'];
-        }
+        $ids = array_column($entries, 'id');
         
         if (count($ids) > 0) {
             $id = max($ids) + 1; 
@@ -140,12 +137,86 @@
         return $error;
     }
     
-    function addComment($filepath, $name, $url, $comment) {
-        $id = getID($filepath);
-        $newentry = array($id, $name, $url, date("Y-m-d H:i:s"), $comment, "");
-        
-        $file = fopen($filepath,"a");
-        fputcsv($file, $newentry);
-        fclose($file);
+    function addComment($filepath, $name, $url, $date, $comment, $reply) {
+        try {
+            $id = getID($filepath);
+            $newentry = array($id, $name, $url, $date, $comment, $reply);
+            
+            $file = fopen($filepath,"a");
+            fputcsv($file, $newentry);
+            fclose($file);
+            
+            return true;
+        } catch (Exception $ex) {
+            echo $ex->getMessage();
+            return false;
+        }
+    }
+    
+    function deleteComment($id, $filepath, $headers) {
+        try {
+            $entries = toArray($filepath);
+            $key = array_search($id, array_column($entries, 'id'));
+            if ($key !== false) {
+                unset($entries[$key]);
+                
+                $file = fopen($filepath,"w");
+                fputcsv($file, $headers);
+                foreach ($entries as $entry) {
+                     fputcsv($file, $entry);
+                }
+                fclose($file);
+                return true;
+            } else {
+                echo "The entry you're trying to delete doesn't exist!";
+                return false;
+            }
+        } catch (Exception $ex) {
+            echo $ex->getMessage();
+            return false;
+        }
+    }
+
+    function updateComment($key, $id, $name, $url, $date, $comment, $reply, $headers) {
+        try {
+            if ($key !== false) {
+                $entries = toArray("entries.csv");
+                $entries[$key] = array($id, $name, $url, $date, $comment, $reply);
+                
+                $file = fopen("entries.csv","w");
+                fputcsv($file, $headers);
+                foreach ($entries as $entry) {
+                  fputcsv($file, $entry);
+                }
+                fclose($file);
+                return true;
+            } else {
+                echo "The entry you're trying to update doesn't exist!";
+                return false;
+            }
+        } catch (Exception $ex)  {
+            echo $ex->getMessage();
+            return false;
+        }
+    }
+    
+    function showEntries($entries, $status) {
+?>
+        <table>
+        <tr><th>Name</th> <th>URL</th> <th>Date</th> <th>Comment</th> <th>Reply</th> <th>Edit</th></tr>
+<?php   foreach ($entries as $entry) { ?>
+            <tr>
+            <td><?php echo $entry['name']; ?></td>
+            <td><a href="<?php echo $entry['url']; ?>"><?php echo $entry['url']; ?></a></td>
+            <td><?php echo date_format(date_create($entry['date']), "Y-m-d"); ?></td>
+            <td><?php echo substr(htmlentities($entry['comment']), 0, 30) . "..."; ?></td>
+            <td><?php echo substr(htmlentities($entry['reply']), 0, 30) . "..." ; ?></td>
+            <td><a href="?p=edit&<?php echo $status; ?>=<?php echo $entry['id']; ?>">Edit</a></td>
+            </tr>
+<?php
+        }
+?>
+        </table>
+<?php
     }
 ?>

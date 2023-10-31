@@ -18,7 +18,7 @@ if (!isset($_SESSION['loggedin'])) {
             // Log in, start a new session, and redirect back to the admin panel
             $_SESSION['loggedin'] = TRUE;
             $_SESSION['name'] = $_POST['username'];
-            header('Location: admin');
+            header('Location: admin.php');
         } else {
             $error = "<p>There was an error logging in. Try again.</p>";
         }
@@ -35,67 +35,40 @@ if (!isset($_SESSION['loggedin'])) {
 ?>
 
 <?php 
-    // Cases for each tab
+    $headers = array("id","name","url","date","comment","reply");
     $tab = $_GET['p'];
     if ($tab=="") { $tab = "home"; }
     
     switch($tab) {
         case "comments":
             $entries = dateSort(toArray("entries.csv"), true);
-?>
-            <h1>Approved comments</h1>
-            <table>
-            <tr><th>Name</th> <th>URL</th> <th>Date</th> <th>Comment</th> <th>Reply</th> <th>Edit</th></tr>
-<?php
-            foreach ($entries as $rows) {
-?>
-                <tr>
-                <td><?php echo $rows['name']; ?></td>
-                <td><a href="<?php echo $rows['url']; ?>"><?php echo $rows['url']; ?></a></td>
-                <td><?php echo date_format(date_create($rows['date']), "Y-m-d"); ?></td>
-                <td><?php echo substr(htmlentities($rows['comment']), 0, 30) . "..."; ?></td>
-                <td><?php echo substr(htmlentities($rows['reply']), 0, 30) . "..." ; ?></td>
-                <td><a href="?p=edit&approved=<?php echo $rows['id']; ?>">Edit</a></td>
-                </tr>
-<?php
+            echo "<h1>Approved comments</h1>";
+            if (countComments($entries) > 0) {
+                showEntries($entries, "approved");
+            } else {
+                echo "<p>No entries to show.</p>";
             }
-?>
-            </table>
-    
-            <p><a href="admin">Back to admin panel</a></p>
-<?php
+            echo "<p><a href=\"admin.php\">Back to admin panel</a></p>";
             break;
+            
         case "pendingcomments":
             $entries = dateSort(toArray("queue.csv"), true); 
-?>
-            <h1>Pending comments</h1>
-            <table>
-            <tr><th>Name</th> <th>URL</th> <th>Date</th> <th>Comment</th> <th>Edit</th></tr>
-<?php
-            foreach ($entries as $rows) {
-?>
-                <tr>
-                <td><?php echo $rows['name']; ?></td>
-                <td><a href="<?php echo $rows['url']; ?>"><?php echo $rows['url']; ?></a></td>
-                <td><?php echo date_format(date_create($rows['date']), "Y-m-d"); ?></td>
-                <td><?php echo substr(htmlentities($rows['comment']), 0, 30) . "..."; ?></td>
-                <td><a href="?p=edit&pending=<?php echo $rows['id']; ?>">Edit</a></td>
-                </tr>
-<?php
+            echo "<h1>Pending comments</h1>";
+            if (countComments($entries) > 0) {
+                showEntries($entries, "pending");
+            } else {
+                echo "<p>No entries to show.</p>";
             }
-?>
-            </table>
-            
-            <p><a href="admin">Back to admin panel</a></p>
-<?php
+            echo "<p><a href=\"admin.php\">Back to admin panel</a></p>";
             break;
+            
         case "edit":
             if (isset($_GET['pending'])) {
                 $entry_id = $_GET['pending'];
                 $entries = toArray("queue.csv");
                 $submittext = "Save and approve";
                 $back = "pendingcomments";
-            } else if (isset($_GET['approved'])) {
+            } elseif (isset($_GET['approved'])) {
                 $entry_id = $_GET['approved'];
                 $entries = toArray("entries.csv");
                 $submittext = "Save changes";
@@ -140,85 +113,41 @@ if (!isset($_SESSION['loggedin'])) {
             if (isset($_POST['submit'])) {
                 $reply = str_replace(array("\r\n", "\r", "\n"), "<br />", $_POST['reply']);
                 if ($_POST['comment_status'] == "pendingcomments") {
-                    $entries = toArray("queue.csv");
-                    $key = array_search($_POST['comment_id'], array_column($entries, 'id'));
-                    if ($key !== false) {
-                        unset($entries[$key]);
+                    if (deleteComment($_POST['comment_id'], "queue.csv", $headers)) {
+                        if (addComment("entries.csv", $_POST['name'], $_POST['url'], $_POST['date'], $_POST['comment'], $reply)) {
+                            echo "<p>Entry approved successfully.</p>";
+                        } else {
+                            echo "<p>An error occurred processing this request.</p>";
+                        }
                     }
-                    
-                    $file = fopen("queue.csv","w");
-                    $headers = ["id","name","url","date","comment","reply"];
-                    fputcsv($file, $headers);
-                    foreach ($entries as $row) {
-                      fputcsv($file, $row);
+                } elseif ($_POST['comment_status'] == "comments") {
+                    if (updateComment($_POST['comment_key'], $_POST['comment_id'], $_POST['name'], $_POST['url'], $_POST['date'], $_POST['comment'], $reply, $headers)) {
+                        echo "<p>Entry updated successfully.</p>";
+                    } else {
+                        echo "<p>An error occurred processing this request.</p>";
                     }
-                    fclose($file);
-                    
-                    $path = "entries.csv";
-                    $new_id = getID($path);
-                    $newentry = array($new_id, $_POST['name'], $_POST['url'], $_POST['date'], $_POST['comment'], $reply);
-                    
-                    $file = fopen("entries.csv","a");
-                    fputcsv($file, $newentry);
-                    fclose($file);
-                } else if ($_POST['comment_status'] == "comments") {
-                    $newentry = array($_POST['comment_id'], $_POST['name'], $_POST['url'], $_POST['date'], $_POST['comment'], $reply);
-                    $entries = toArray("entries.csv");
-                    $key = array_search($_POST['comment_id'], array_column($entries, 'id'));
-                    if ($key !== false) {
-                        $entries[$key] = $newentry;
-                    }
-                    
-                    $file = fopen("entries.csv","w");
-                    $headers = ["id","name","url","date","comment","reply"];
-                    fputcsv($file, $headers);
-                    foreach ($entries as $row) {
-                      fputcsv($file, $row);
-                    }
-                    fclose($file);
                 }
 ?>
-                <p>Entry edited successfully.</p>
                 <p><a href="?p=<?php echo $_POST['comment_status']; ?>">Back to list of comments</a></p>
 <?php
-            } else if (isset($_POST['delete'])) {
+            } elseif (isset($_POST['delete'])) {
                 if ($_POST['comment_status'] == "pendingcomments") {
-                    $entries = toArray("queue.csv");
-                    $key = array_search($_POST['comment_id'], array_column($entries, 'id'));
-                    if ($key !== false) {
-                        unset($entries[$key]);
-                    }
-                    
-                    $file = fopen("queue.csv","w");
-                    $headers = ["id","name","url","date","comment","reply"];
-                    fputcsv($file, $headers);
-                    foreach ($entries as $row) {
-                      fputcsv($file, $row);
-                    }
-                    fclose($file);
-                } else if ($_POST['comment_status'] == "comments") {
-                    $entries = toArray("entries.csv");
-                    $key = array_search($_POST['comment_id'], array_column($entries, 'id'));
-                    if ($key !== false) {
-                        unset($entries[$key]);
-                    }
-                    
-                    $file = fopen("entries.csv","w");
-                    $headers = ["id","name","url","date","comment","reply"];
-                    fputcsv($file, $headers);
-                    foreach ($entries as $row) {
-                      fputcsv($file, $row);
-                    }
-                    fclose($file);
+                    $filepath = "queue.csv";
+                } elseif ($_POST['comment_status'] == "comments") {
+                    $filepath = "entries.csv";
+                }
+                if (deleteComment($_POST['comment_id'], $filepath, $headers)) {
+                    echo "<p>Entry deleted successfully.</p>";
+                } else {
+                    echo "<p>An error occurred processing this request.</p>";
                 }
 ?>
-                <p>Entry deleted successfully.</p>
                 <p><a href="?p=<?php echo $_POST['comment_status']; ?>">Back to list of comments</a></p>
 <?php
             } else {
 ?>
                 <p>Oops! You must have gotten here by mistake.</p>
-                <p><a href="admin">Back to admin panel</a></p>
+                <p><a href="admin.php">Back to admin panel</a></p>
 <?php
             }
             break;
@@ -227,7 +156,7 @@ if (!isset($_SESSION['loggedin'])) {
             <ul>
                 <li><a href="?p=comments">Approved comments</a></li>
                 <li><a href="?p=pendingcomments">Pending comments</a></li>
-                <li><a href="index">View guestbook</a></li>
+                <li><a href="index.php">View guestbook</a></li>
             </ul>
 
             <a href="?p=logout">Logout</a>
@@ -235,7 +164,7 @@ if (!isset($_SESSION['loggedin'])) {
             break;
         case "logout":
             session_destroy();
-            header('Location: admin');
+            header('Location: admin.php');
             break;
     }
 ?>

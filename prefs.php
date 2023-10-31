@@ -13,10 +13,10 @@ $securityq = "Is water liquid at 0&deg;C?";
 $securitya = "no";
 
 // Text to display with no entries
-$noentries = "<p>No entries have been left yet. The first one could be you!</p>";
+$noEntries = "<p>No entries have been left yet. The first one could be you!</p>";
 
 // Entries per page
-$per_page = 10;
+$perPage = 10;
 
 // Entry date sort order (true for descending, false for ascending)
 $descending = true;
