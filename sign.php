@@ -1,5 +1,5 @@
 <?php 
-include "includes/gb-top.php";
+    include "includes/gb-top.php";
 ?>
 
 <h2>Sign guestbook</h2>
@@ -20,5 +20,5 @@ include "includes/gb-top.php";
 <input type="submit" name="submit" value="Submit" />
 
 <?php 
-include "includes/gb-bottom.php";
+    include "includes/gb-bottom.php";
 ?>

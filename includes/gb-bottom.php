@@ -1,4 +1,4 @@
 <?php 
-include "templates/gb-footer.php";
-include "templates/bottom.php";
+    include "templates/gb-footer.php";
+    include "templates/bottom.php";
 ?>
