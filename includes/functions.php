@@ -46,18 +46,21 @@
 	function showPages($page, $total_pages) {
         if ($total_pages > 0) { ?>
             <ul class="pages">
-            <?php if ($page > 1) { echo "<li class=\"page\"><a href=\"?page=". $page-1 ."\">‹ Prev</a></li>"; } ?>
-            <?php if ($page > 3) { echo "<li class=\"page\"><a href=\"?page=1\">1</a></li>"; echo "<li class=\"dots\">...</li>"; } ?>
-            <?php if ($page-2 > 0) { echo "<li class=\"page\"><a href=\"?page=". $page-2 ."\">". $page-2 ."</a></li>"; } 
-                  if ($page-1 > 0) { echo "<li class=\"page\"><a href=\"?page=". $page-1 ."\">". $page-1 ."</a></li>"; } ?>
-            <li class="active"><?php echo $page ?></li>
-            <?php if ($page+1 < $total_pages+1) { echo "<li class=\"page\"><a href=\"?page=". $page+1 ."\">". $page+1 ."</a></li>"; } 
-                  if ($page+2 < $total_pages+1) { echo "<li class=\"page\"><a href=\"?page=". $page+2 ."\">". $page+2 ."</a></li>"; } ?>
-            <?php if ($page < $total_pages-2) { echo "<li class=\"dots\">...</li>"; echo "<li class=\"page\"><a href=\"?page=". $total_pages ."\">". $total_pages ."</a></li>"; } ?>
-            <?php if ($page < $total_pages) { echo "<li class=\"page\"><a href=\"?page=". $page+1 ."\">Next ›</a></li>"; } ?>
+            <?php 
+            if ($page > 1) { echo "<li class=\"page\"><a href=\"?page=". $page-1 ."\">‹ Prev</a></li>"; } 
+            if ($page > 3) { echo "<li class=\"page\"><a href=\"?page=1\">1</a></li>"; echo "<li class=\"dots\">...</li>"; }
+            if ($page-2 > 0) { echo "<li class=\"page\"><a href=\"?page=". $page-2 ."\">". $page-2 ."</a></li>"; } 
+            if ($page-1 > 0) { echo "<li class=\"page\"><a href=\"?page=". $page-1 ."\">". $page-1 ."</a></li>"; } ?>
+            <li class="active"><?php echo $page; ?></li>
+            <?php 
+            if ($page+1 < $total_pages+1) { echo "<li class=\"page\"><a href=\"?page=". $page+1 ."\">". $page+1 ."</a></li>"; } 
+            if ($page+2 < $total_pages+1) { echo "<li class=\"page\"><a href=\"?page=". $page+2 ."\">". $page+2 ."</a></li>"; }
+            if ($page < $total_pages-2) { echo "<li class=\"dots\">...</li>"; echo "<li class=\"page\"><a href=\"?page=". $total_pages ."\">". $total_pages ."</a></li>"; }
+            if ($page < $total_pages) { echo "<li class=\"page\"><a href=\"?page=". $page+1 ."\">Next ›</a></li>"; } ?>
             </ul>
-<?php }
-	}
+<?php 
+        }
+    }
     
     function displayEntry($name, $url, $date, $comment, $reply) {
         include "templates/entry.php";
